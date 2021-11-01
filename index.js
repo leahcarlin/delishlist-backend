@@ -2,8 +2,12 @@ const express = require("express");
 const loggerMiddleWare = require("morgan");
 const corsMiddleWare = require("cors");
 const { PORT } = require("./config/constants");
-const authRouter = require("./routers/auth");
 const authMiddleWare = require("./auth/middleware");
+
+//import routers
+const authRouter = require("./routers/auth");
+const restRouter = require("./routers/restaurant");
+const { application } = require("express");
 
 const app = express();
 /**
@@ -124,6 +128,7 @@ app.post("/authorized_post_request", authMiddleWare, (req, res) => {
 });
 
 app.use("/", authRouter);
+app.use("/restaurants", restRouter);
 
 // Listen for connections on specified port (default is port 4000)
 

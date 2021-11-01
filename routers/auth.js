@@ -2,8 +2,11 @@ const bcrypt = require("bcrypt");
 const { Router } = require("express");
 const { toJWT } = require("../auth/jwt");
 const authMiddleware = require("../auth/middleware");
-const User = require("../models/").user;
 const { SALT_ROUNDS } = require("../config/constants");
+
+//model imports
+const User = require("../models/").user;
+const List = require("../models/").list;
 
 const router = new Router();
 
@@ -21,7 +24,7 @@ router.post("/login", async (req, res, next) => {
 
     if (!user || !bcrypt.compareSync(password, user.password)) {
       return res.status(400).send({
-        message: "User with that email not found or password incorrect"
+        message: "User with that email not found or password incorrect",
       });
     }
 
@@ -44,7 +47,7 @@ router.post("/signup", async (req, res) => {
     const newUser = await User.create({
       email,
       password: bcrypt.hashSync(password, SALT_ROUNDS),
-      name
+      name,
     });
 
     delete newUser.dataValues["password"]; // don't send back the password hash
@@ -70,6 +73,19 @@ router.get("/me", authMiddleware, async (req, res) => {
   // don't send back the password hash
   delete req.user.dataValues["password"];
   res.status(200).send({ ...req.user.dataValues });
+});
+
+// GET all artworks `localhost:4000/mylists`
+router.get("/mylists", authMiddleware, async (req, res) => {
+  try {
+    const userWithLists = await User.findByPk(req.user.id, {
+      include: { model: [List] },
+    });
+    console.log("user in back end", userWithLists);
+    res.send(userWithLists);
+  } catch (e) {
+    next(e);
+  }
 });
 
 module.exports = router;
