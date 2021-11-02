@@ -2,8 +2,13 @@ const bcrypt = require("bcrypt");
 const { Router } = require("express");
 const { toJWT } = require("../auth/jwt");
 const authMiddleware = require("../auth/middleware");
-const User = require("../models/").user;
 const { SALT_ROUNDS } = require("../config/constants");
+
+//model imports
+const User = require("../models/").user;
+const List = require("../models/").list;
+const Collaborator = require("../models/").collaborator;
+const Restaurant = require("../models/").restaurant;
 
 const router = new Router();
 
@@ -21,7 +26,7 @@ router.post("/login", async (req, res, next) => {
 
     if (!user || !bcrypt.compareSync(password, user.password)) {
       return res.status(400).send({
-        message: "User with that email not found or password incorrect"
+        message: "User with that email not found or password incorrect",
       });
     }
 
@@ -44,7 +49,7 @@ router.post("/signup", async (req, res) => {
     const newUser = await User.create({
       email,
       password: bcrypt.hashSync(password, SALT_ROUNDS),
-      name
+      name,
     });
 
     delete newUser.dataValues["password"]; // don't send back the password hash
@@ -71,5 +76,77 @@ router.get("/me", authMiddleware, async (req, res) => {
   delete req.user.dataValues["password"];
   res.status(200).send({ ...req.user.dataValues });
 });
+
+// GET my lists `localhost:4000/mylists`
+router.get("/mylists", authMiddleware, async (req, res, next) => {
+  try {
+    const userWithLists = await User.findByPk(req.user.id, {
+      include: { model: List },
+    });
+    // console.log("user in back end", userWithLists);
+    res.send(userWithLists);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// GET single list details `localhost:4000/mylists/:id`
+router.get("/mylists/:id", async (req, res, next) => {
+  try {
+    const listId = req.params.id;
+    const listDetails = await List.findByPk(listId, {
+      include: {
+        model: Restaurant,
+        through: {
+          attributes: [
+            /*can put an attribute here*/
+          ],
+        },
+      },
+    });
+    if (!listDetails) {
+      res.status(404).send("No list found for this id");
+    } else {
+      console.log("list details in back end", listDetails);
+      res.send(listDetails);
+    }
+  } catch (e) {
+    next(e);
+  }
+});
+
+// Create a new lists - POST `localhost:4000/mylists`
+router.post("/mylists", authMiddleware, async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) res.status(404).send({ message: "No user found" });
+    const { title } = req.body;
+    if (!title)
+      res
+        .status(400)
+        .send({ message: "A title is required to create a new list" });
+    else {
+      const newList = await List.create({
+        title,
+        ownerId: req.user.id,
+      });
+      res.status(201).send({ ...newList.dataValues });
+    }
+  } catch (e) {
+    next(e);
+  }
+});
+
+// Find number of shared lists - GET `localhost:4000/shared-lists`
+// router.get("/shared-lists", authMiddleware, async (req, res, next) => {
+//   try {
+//     const user = await User.findByPk(req.user.id)
+//     if (!user) res.status(404).send({ message: "No user found" });
+//     const
+
+//   } catch (e) {
+//     next(e);
+//   }
+// });
 
 module.exports = router;
