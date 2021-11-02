@@ -13,6 +13,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "listId",
       });
       list.hasMany(models.restaurant);
+      list.belongsTo(models.user, {
+        foreignKey: "ownerId",
+      });
     }
   }
   list.init(

@@ -40,7 +40,7 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        userId: 1,
+        userId: 2,
         listId: 5,
         createdAt: new Date(),
         updatedAt: new Date(),

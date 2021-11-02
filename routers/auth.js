@@ -75,14 +75,36 @@ router.get("/me", authMiddleware, async (req, res) => {
   res.status(200).send({ ...req.user.dataValues });
 });
 
-// GET all artworks `localhost:4000/mylists`
-router.get("/mylists", authMiddleware, async (req, res) => {
+// GET my lists `localhost:4000/mylists`
+router.get("/mylists", authMiddleware, async (req, res, next) => {
   try {
     const userWithLists = await User.findByPk(req.user.id, {
-      include: { model: [List] },
+      include: { model: List },
     });
     console.log("user in back end", userWithLists);
     res.send(userWithLists);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// Create a new lists - POST `localhost:4000/mylists`
+router.post("/mylists", authMiddleware, async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user) res.status(404).send({ message: "No user found" });
+    const { title } = req.body;
+    if (!title)
+      res
+        .status(400)
+        .send({ message: "A title is required to create a new list" });
+    else {
+      const newList = await List.create({
+        title,
+        ownerId: req.user.id,
+      });
+      res.status(201).send({ ...newList.dataValues });
+    }
   } catch (e) {
     next(e);
   }

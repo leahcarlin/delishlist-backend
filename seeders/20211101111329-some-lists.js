@@ -17,7 +17,7 @@ module.exports = {
       },
       {
         title: "Italian Restaurants",
-        ownerId: 2,
+        ownerId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -29,7 +29,7 @@ module.exports = {
       },
       {
         title: "Brunch",
-        ownerId: 1,
+        ownerId: 2,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
