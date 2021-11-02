@@ -18,7 +18,7 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      restId: {
+      restaurantId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {

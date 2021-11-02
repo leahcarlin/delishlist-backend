@@ -12,7 +12,10 @@ module.exports = (sequelize, DataTypes) => {
         through: "collaborators",
         foreignKey: "listId",
       });
-      list.hasMany(models.restaurant);
+      list.belongsToMany(models.restaurant, {
+        through: "listRest",
+        foreignKey: "listId",
+      });
       list.belongsTo(models.user, {
         foreignKey: "ownerId",
       });

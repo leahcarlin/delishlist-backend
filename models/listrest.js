@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   listRest.init(
     {
       listId: { type: DataTypes.INTEGER, allowNull: false },
-      restId: { type: DataTypes.INTEGER, allowNull: false },
+      restaurantId: { type: DataTypes.INTEGER, allowNull: false },
     },
     {
       sequelize,

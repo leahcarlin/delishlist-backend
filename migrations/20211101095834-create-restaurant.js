@@ -16,7 +16,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       rating: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.DECIMAL,
       },
       photo: {
         type: Sequelize.STRING,

@@ -7,6 +7,8 @@ const { SALT_ROUNDS } = require("../config/constants");
 //model imports
 const User = require("../models/").user;
 const List = require("../models/").list;
+const Collaborator = require("../models/").collaborator;
+const Restaurant = require("../models/").restaurant;
 
 const router = new Router();
 
@@ -81,8 +83,33 @@ router.get("/mylists", authMiddleware, async (req, res, next) => {
     const userWithLists = await User.findByPk(req.user.id, {
       include: { model: List },
     });
-    console.log("user in back end", userWithLists);
+    // console.log("user in back end", userWithLists);
     res.send(userWithLists);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// GET single list details `localhost:4000/mylists/:id`
+router.get("/mylists/:id", async (req, res, next) => {
+  try {
+    const listId = req.params.id;
+    const listDetails = await List.findByPk(listId, {
+      include: {
+        model: Restaurant,
+        through: {
+          attributes: [
+            /*can put an attribute here*/
+          ],
+        },
+      },
+    });
+    if (!listDetails) {
+      res.status(404).send("No list found for this id");
+    } else {
+      console.log("list details in back end", listDetails);
+      res.send(listDetails);
+    }
   } catch (e) {
     next(e);
   }
@@ -109,5 +136,17 @@ router.post("/mylists", authMiddleware, async (req, res, next) => {
     next(e);
   }
 });
+
+// Find number of shared lists - GET `localhost:4000/shared-lists`
+// router.get("/shared-lists", authMiddleware, async (req, res, next) => {
+//   try {
+//     const user = await User.findByPk(req.user.id)
+//     if (!user) res.status(404).send({ message: "No user found" });
+//     const
+
+//   } catch (e) {
+//     next(e);
+//   }
+// });
 
 module.exports = router;

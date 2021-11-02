@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       restaurant.belongsToMany(models.list, {
         through: "listRests",
-        foreignKey: "restId",
+        foreignKey: "restaurantId",
       });
     }
   }
@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: { type: DataTypes.STRING, allowNull: false },
       priceLevel: DataTypes.INTEGER,
-      rating: DataTypes.INTEGER,
+      rating: DataTypes.DECIMAL,
       photo: DataTypes.STRING,
       favorite: DataTypes.BOOLEAN,
       placeId: { type: DataTypes.STRING, allowNull: false },
