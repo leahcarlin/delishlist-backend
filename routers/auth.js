@@ -81,7 +81,15 @@ router.get("/me", authMiddleware, async (req, res) => {
 router.get("/mylists", authMiddleware, async (req, res, next) => {
   try {
     const userWithLists = await User.findByPk(req.user.id, {
-      include: { model: List },
+      include: {
+        model: List,
+        include: {
+          model: User,
+          through: {
+            attributes: [],
+          },
+        },
+      },
     });
     // console.log("user in back end", userWithLists);
     res.send(userWithLists);
@@ -95,14 +103,24 @@ router.get("/mylists/:id", async (req, res, next) => {
   try {
     const listId = req.params.id;
     const listDetails = await List.findByPk(listId, {
-      include: {
-        model: Restaurant,
-        through: {
-          attributes: [
-            /*can put an attribute here*/
-          ],
+      include: [
+        {
+          model: Restaurant,
+          through: {
+            attributes: [
+              /*can put an attribute here*/
+            ],
+          },
         },
-      },
+        {
+          model: User,
+          through: {
+            attributes: [
+              /*can put an attribute here*/
+            ],
+          },
+        },
+      ],
     });
     if (!listDetails) {
       res.status(404).send("No list found for this id");
@@ -137,16 +155,27 @@ router.post("/mylists", authMiddleware, async (req, res, next) => {
   }
 });
 
-// Find number of shared lists - GET `localhost:4000/shared-lists`
-// router.get("/shared-lists", authMiddleware, async (req, res, next) => {
-//   try {
-//     const user = await User.findByPk(req.user.id)
-//     if (!user) res.status(404).send({ message: "No user found" });
-//     const
-
-//   } catch (e) {
-//     next(e);
-//   }
-// });
+// add a restaurant to one of my lists
+router.post(
+  ":userId/mylists/:listId",
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const { userId } = req.params.userId;
+      const { listId } = req.params.listId;
+      const user = await User.findByPk(userId, {
+        include: {
+          model: List,
+          through: {
+            attributes: [],
+          },
+        },
+        where: { listId: listId },
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 
 module.exports = router;

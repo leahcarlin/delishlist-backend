@@ -128,7 +128,7 @@ app.post("/authorized_post_request", authMiddleWare, (req, res) => {
 });
 
 app.use("/", authRouter);
-app.use("/restaurants", restRouter);
+app.use("/restaurant", restRouter);
 
 // Listen for connections on specified port (default is port 4000)
 
