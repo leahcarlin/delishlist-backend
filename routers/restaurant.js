@@ -21,10 +21,21 @@ router.get("/:id", (req, res) => {
   );
 });
 
-// mark a restaurant as a favorite
-// router.put("/:id/favorite", (req, res, next) => {
-//   const id = req.params.id
+// search for a restaurant by name using google places api
+router.post("/search", (req, res) => {
+  const { name } = req.body;
+  request(
+    {
+      url: `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${name}&inputtype=textquery&locationbias=circle&fields=formatted_address%2Cname%2Cprice_level%2Crating%2Cphotos%2Cplace_id&key=${API_KEY}`,
+    },
+    (error, response, body) => {
+      if (error || response.statusCode !== 200) {
+        return res.status(500).send({ type: "error", message: err.message });
+      }
 
-// })
+      res.send(JSON.parse(body));
+    }
+  );
+});
 
 module.exports = router;
