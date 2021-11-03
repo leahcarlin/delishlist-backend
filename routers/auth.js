@@ -155,17 +155,27 @@ router.post("/mylists", authMiddleware, async (req, res, next) => {
   }
 });
 
-// Find number of shared lists - GET `localhost:4000/shared-lists`
-// router.get("/shared-lists/:id", async (req, res, next) => {
-//   try {
-//     const { id } = req.params.id;
-//     const collaborators = await Collaborator.findAll({
-//       where: collaborators.userId === id,
-//     });
-//     res.send(collaborators);
-//   } catch (e) {
-//     next(e);
-//   }
-// });
+// add a restaurant to one of my lists
+router.post(
+  ":userId/mylists/:listId",
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const { userId } = req.params.userId;
+      const { listId } = req.params.listId;
+      const user = await User.findByPk(userId, {
+        include: {
+          model: List,
+          through: {
+            attributes: [],
+          },
+        },
+        where: { listId: listId },
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 
 module.exports = router;
