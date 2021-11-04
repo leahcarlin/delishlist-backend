@@ -189,22 +189,46 @@ router.post("/mylists/:id", async (req, res, next) => {
 });
 
 // add a collaborator to one of my lists
-router.get("/mylists/:id/add/:userId", async (req, res, next) => {
-  try {
-    const listId = req.params.id;
-    const userId = req.params.userId;
-    const userToAdd = await User.findByPk(userId);
-    if (!userToAdd) res.status(404).send({ message: "User not found" });
-    else {
-      const addCollab = await Collaborator.create({
-        userId: userToAdd.id,
-        listId: listId,
+router.get(
+  "/mylists/:id/add/:userId",
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const requestorId = req.user.id;
+      const listId = req.params.id;
+
+      //check permissions - only the owner can add collaborators to a list
+      const list = await List.findByPk(listId);
+      if (list.ownerId !== requestorId)
+        res.status(401).send({
+          message: "Only the list's owner can add other collaborators",
+        });
+
+      const addUserId = req.params.userId;
+      const user = await User.findByPk(addUserId);
+      if (!user) res.status(404).send({ message: "User not found" });
+
+      const checkCollab = await Collaborator.findOne({
+        where: { listId: list.id, userId: user.id },
       });
-      res.status(201).send({ ...addCollab.dataValues });
+      console.log("check collab:", checkCollab);
+
+      if (checkCollab) {
+        res.status(406).send({
+          message:
+            "The user you want to add is already a collaborator on this list",
+        });
+      } else {
+        const addCollab = await Collaborator.create({
+          userId: user.id,
+          listId: list.id,
+        });
+        res.status(201).send({ ...addCollab.dataValues });
+      }
+    } catch (e) {
+      next(e);
     }
-  } catch (e) {
-    next(e);
   }
-});
+);
 
 module.exports = router;

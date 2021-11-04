@@ -20,8 +20,18 @@ module.exports = {
         {
           firstName: "B-Test",
           lastName: "User",
-          email: "a@a.com",
-          password: bcrypt.hashSync("a", SALT_ROUNDS),
+          email: "b@b.com",
+          password: bcrypt.hashSync("b", SALT_ROUNDS),
+          profileImg:
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ72nARG6ueWpDbDXkXV137m7fVt2ALVshZwg&usqp=CAU",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          firstName: "C-Test",
+          lastName: "User",
+          email: "c@c.com",
+          password: bcrypt.hashSync("c", SALT_ROUNDS),
           profileImg:
             "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ72nARG6ueWpDbDXkXV137m7fVt2ALVshZwg&usqp=CAU",
           createdAt: new Date(),
