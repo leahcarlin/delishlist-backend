@@ -160,23 +160,19 @@ router.post("/mylists", authMiddleware, async (req, res, next) => {
 router.post("/mylists/:id", async (req, res, next) => {
   try {
     const listId = req.params.id;
-    const list = await List.findByPk(listId, {
-      include: {
-        model: Restaurant,
-        through: {
-          attributes: [],
-        },
-      },
-    });
+    const list = await List.findByPk(listId)
     if (!list) res.status(404).send({ message: "List not found" });
-    console.log("list", list);
-    const { name, placeId } = req.body;
+    
+    const { name, photoReference, placeId, priceLevel, rating } = req.body;
     let restaurant = await Restaurant.findOne({ where: { placeId } });
 
     if (!restaurant) {
       restaurant = await Restaurant.create({
         name,
+        photoReference,
         placeId,
+        priceLevel,
+        rating,
       });
     }
 

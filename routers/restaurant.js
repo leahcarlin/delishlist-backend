@@ -26,7 +26,7 @@ router.post("/search", (req, res) => {
   const { name } = req.body;
   request(
     {
-      url: `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${name}&inputtype=textquery&locationbias=circle&fields=formatted_address%2Cname%2Cprice_level%2Crating%2Cphotos%2Cplace_id&key=${API_KEY}`,
+      url: `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${name}&inputtype=textquery&fields=formatted_address%2Cname%2Cprice_level%2Crating%2Cphotos%2Cplace_id&key=${API_KEY}`,
     },
     (error, response, body) => {
       if (error || response.statusCode !== 200) {
