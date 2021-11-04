@@ -9,6 +9,7 @@ const User = require("../models/").user;
 const List = require("../models/").list;
 const Collaborator = require("../models/").collaborator;
 const Restaurant = require("../models/").restaurant;
+const ListRest = require("../models/").listRest;
 
 const router = new Router();
 
@@ -156,26 +157,35 @@ router.post("/mylists", authMiddleware, async (req, res, next) => {
 });
 
 // add a restaurant to one of my lists
-router.post(
-  ":userId/mylists/:listId",
-  authMiddleware,
-  async (req, res, next) => {
-    try {
-      const { userId } = req.params.userId;
-      const { listId } = req.params.listId;
-      const user = await User.findByPk(userId, {
-        include: {
-          model: List,
-          through: {
-            attributes: [],
-          },
-        },
-        where: { listId: listId },
+router.post("/mylists/:id", async (req, res, next) => {
+  try {
+    const listId = req.params.id;
+    const list = await List.findByPk(listId)
+    if (!list) res.status(404).send({ message: "List not found" });
+    
+    const { name, photoReference, placeId, priceLevel, rating } = req.body;
+    let restaurant = await Restaurant.findOne({ where: { placeId } });
+
+    if (!restaurant) {
+      restaurant = await Restaurant.create({
+        name,
+        photoReference,
+        placeId,
+        priceLevel,
+        rating,
       });
-    } catch (e) {
-      next(e);
     }
+
+    const setRelations = await ListRest.create({
+      listId: list.id,
+      restaurantId: restaurant.id,
+    });
+    res
+      .status(201)
+      .send({ ...restaurant.dataValues, ...setRelations.dataValues });
+  } catch (e) {
+    next(e);
   }
-);
+});
 
 module.exports = router;

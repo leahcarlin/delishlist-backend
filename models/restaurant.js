@@ -17,11 +17,10 @@ module.exports = (sequelize, DataTypes) => {
   restaurant.init(
     {
       name: { type: DataTypes.STRING, allowNull: false },
+      photoReference: DataTypes.STRING,
+      placeId: { type: DataTypes.STRING, allowNull: false },
       priceLevel: DataTypes.INTEGER,
       rating: DataTypes.DECIMAL,
-      photo: DataTypes.STRING,
-      favorite: DataTypes.BOOLEAN,
-      placeId: { type: DataTypes.STRING, allowNull: false },
     },
     {
       sequelize,

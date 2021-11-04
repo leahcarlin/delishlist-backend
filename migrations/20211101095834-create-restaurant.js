@@ -12,21 +12,18 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      photoReference: {
+        type: Sequelize.STRING,
+      },
+      placeId: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       priceLevel: {
         type: Sequelize.INTEGER,
       },
       rating: {
         type: Sequelize.DECIMAL,
-      },
-      photo: {
-        type: Sequelize.STRING,
-      },
-      favorite: {
-        type: Sequelize.BOOLEAN,
-      },
-      placeId: {
-        type: Sequelize.STRING,
-        allowNull: false,
       },
       createdAt: {
         allowNull: false,
