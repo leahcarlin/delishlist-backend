@@ -160,9 +160,9 @@ router.post("/mylists", authMiddleware, async (req, res, next) => {
 router.post("/mylists/:id", async (req, res, next) => {
   try {
     const listId = req.params.id;
-    const list = await List.findByPk(listId)
+    const list = await List.findByPk(listId);
     if (!list) res.status(404).send({ message: "List not found" });
-    
+
     const { name, photoReference, placeId, priceLevel, rating } = req.body;
     let restaurant = await Restaurant.findOne({ where: { placeId } });
 
@@ -183,6 +183,25 @@ router.post("/mylists/:id", async (req, res, next) => {
     res
       .status(201)
       .send({ ...restaurant.dataValues, ...setRelations.dataValues });
+  } catch (e) {
+    next(e);
+  }
+});
+
+// add a collaborator to one of my lists
+router.get("/mylists/:id/add/:userId", async (req, res, next) => {
+  try {
+    const listId = req.params.id;
+    const userId = req.params.userId;
+    const userToAdd = await User.findByPk(userId);
+    if (!userToAdd) res.status(404).send({ message: "User not found" });
+    else {
+      const addCollab = await Collaborator.create({
+        userId: userToAdd.id,
+        listId: listId,
+      });
+      res.status(201).send({ ...addCollab.dataValues });
+    }
   } catch (e) {
     next(e);
   }
