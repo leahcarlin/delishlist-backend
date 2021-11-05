@@ -3,6 +3,7 @@ const { Router } = require("express");
 const { toJWT } = require("../auth/jwt");
 const authMiddleware = require("../auth/middleware");
 const { SALT_ROUNDS } = require("../config/constants");
+const { Op } = require("sequelize");
 
 //model imports
 const User = require("../models/").user;
@@ -183,6 +184,28 @@ router.post("/mylists/:id", async (req, res, next) => {
     res
       .status(201)
       .send({ ...restaurant.dataValues, ...setRelations.dataValues });
+  } catch (e) {
+    next(e);
+  }
+});
+
+// search for a user by name
+router.post("/user/search", async (req, res, next) => {
+  try {
+    const { firstName, lastName } = req.body;
+    const findUser = await User.findAll({
+      where: {
+        [Op.or]: {
+          firstName: { [Op.iLike]: `%${firstName}%` },
+          lastName: { [Op.iLike]: `%${lastName}%` },
+        },
+      },
+    });
+    console.log("user?", findUser);
+    if (!findUser) res.status(404).send({ message: "No user(s) found" });
+    else {
+      res.status(201).send(findUser);
+    }
   } catch (e) {
     next(e);
   }
