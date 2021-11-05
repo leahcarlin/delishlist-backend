@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       listId: { type: DataTypes.INTEGER, allowNull: false },
       restaurantId: { type: DataTypes.INTEGER, allowNull: false },
+      visited: { type: DataTypes.BOOLEAN, defaultValue: false },
     },
     {
       sequelize,

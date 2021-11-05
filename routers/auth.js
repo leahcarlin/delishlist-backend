@@ -42,16 +42,20 @@ router.post("/login", async (req, res, next) => {
 });
 
 router.post("/signup", async (req, res) => {
-  const { email, password, name } = req.body;
-  if (!email || !password || !name) {
-    return res.status(400).send("Please provide an email, password and a name");
+  const { firstName, lastName, email, password, profileImg } = req.body;
+  if (!email || !password || !firstName || !lastName) {
+    return res
+      .status(400)
+      .send("Please provide an email, password and your first and last name");
   }
 
   try {
     const newUser = await User.create({
+      firstName,
+      lastName,
       email,
       password: bcrypt.hashSync(password, SALT_ROUNDS),
-      name,
+      profileImg,
     });
 
     delete newUser.dataValues["password"]; // don't send back the password hash
@@ -192,17 +196,18 @@ router.post("/mylists/:id", async (req, res, next) => {
 // search for a user by name
 router.post("/user/search", async (req, res, next) => {
   try {
-    const { firstName, lastName } = req.body;
+    const { name } = req.body;
     const findUser = await User.findAll({
       where: {
         [Op.or]: {
-          firstName: { [Op.iLike]: `%${firstName}%` },
-          lastName: { [Op.iLike]: `%${lastName}%` },
+          firstName: { [Op.iLike]: `%${name}%` },
+          lastName: { [Op.iLike]: `%${name}%` },
         },
       },
     });
     console.log("user?", findUser);
-    if (!findUser) res.status(404).send({ message: "No user(s) found" });
+    if (findUser.length === 0)
+      res.status(404).send({ message: "No user(s) found" });
     else {
       res.status(201).send(findUser);
     }
