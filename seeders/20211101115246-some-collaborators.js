@@ -16,6 +16,12 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        userId: 1,
+        listId: 2,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
         userId: 2,
         listId: 2,
         createdAt: new Date(),
