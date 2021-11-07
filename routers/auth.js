@@ -11,6 +11,7 @@ const List = require("../models/").list;
 const Collaborator = require("../models/").collaborator;
 const Restaurant = require("../models/").restaurant;
 const ListRest = require("../models/").listRest;
+const UserRest = require("../models/").userRest;
 
 const router = new Router();
 
@@ -113,9 +114,7 @@ router.get("/mylists/:id", async (req, res, next) => {
         {
           model: Restaurant,
           through: {
-            attributes: [
-              /*can put an attribute here*/
-            ],
+            attributes: ["visited"],
           },
         },
         {
