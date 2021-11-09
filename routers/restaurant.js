@@ -9,6 +9,7 @@ const API_KEY = "AIzaSyC8xDuaNPzG31t7Ns31FOlA8Q1HngWaWTM";
 const ListRest = require("../models/").listRest;
 const Restaurant = require("../models/").restaurant;
 const UserRest = require("../models/").userRest;
+const User = require("../models/").user;
 
 // GET a restaurant with its placeId
 router.get("/:id", (req, res) => {
@@ -59,39 +60,6 @@ router.patch("/visited", async (req, res, next) => {
       });
       res.status(201).send(markVisited);
     }
-  } catch (e) {
-    next(e);
-  }
-});
-
-// add a restaurant as MY favorite
-router.post("/:placeId/favorite", authMiddleware, async (req, res, next) => {
-  try {
-    const userId = req.user.id;
-    const placeId = req.params.placeId;
-
-    // is restaurant already in the database?
-    const restaurant = await Restaurant.findOne({
-      where: { placeId: placeId },
-    });
-    if (!restaurant)
-      res.status(404).send({
-        message: "Restaurant is not yet in database",
-      });
-    // check to see if already in favorites table
-    const checkRelation = await UserRest.findOne({
-      where: { userId: userId, restaurantId: restaurant.id },
-    });
-    if (checkRelation)
-      res.status(404).send({
-        message: "You already have this restaurant marked as a favorite",
-      });
-
-    const addFavorite = await UserRest.create({
-      userId: userId,
-      restaurantId: restaurant.id,
-    });
-    res.status(201).send({ ...addFavorite.dataValues });
   } catch (e) {
     next(e);
   }

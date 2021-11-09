@@ -120,9 +120,7 @@ router.get("/mylists/:id", async (req, res, next) => {
         {
           model: User,
           through: {
-            attributes: [
-              /*can put an attribute here*/
-            ],
+            attributes: [],
           },
         },
       ],
@@ -130,7 +128,6 @@ router.get("/mylists/:id", async (req, res, next) => {
     if (!listDetails) {
       res.status(404).send("No list found for this id");
     } else {
-      console.log("list details in back end", listDetails);
       res.send(listDetails);
     }
   } catch (e) {
@@ -153,7 +150,13 @@ router.post("/mylists", authMiddleware, async (req, res, next) => {
         title,
         ownerId: req.user.id,
       });
-      res.status(201).send({ ...newList.dataValues });
+      const newRelation = await Collaborator.create({
+        userId: req.user.id,
+        listId: newList.id,
+      });
+      res
+        .status(201)
+        .send({ ...newList.dataValues, ...newRelation.dataValues });
     }
   } catch (e) {
     next(e);
@@ -161,7 +164,7 @@ router.post("/mylists", authMiddleware, async (req, res, next) => {
 });
 
 // add a restaurant to one of my lists
-router.post("/mylists/:id", async (req, res, next) => {
+router.post("/mylists/:id", authMiddleware, async (req, res, next) => {
   try {
     const listId = req.params.id;
     const list = await List.findByPk(listId);
@@ -180,13 +183,15 @@ router.post("/mylists/:id", async (req, res, next) => {
       });
     }
 
-    const setRelations = await ListRest.create({
+    const setRelationsListRest = await ListRest.create({
       listId: list.id,
       restaurantId: restaurant.id,
     });
-    res
-      .status(201)
-      .send({ ...restaurant.dataValues, ...setRelations.dataValues });
+
+    res.status(201).send({
+      ...restaurant.dataValues,
+      ...setRelationsListRest.dataValues,
+    });
   } catch (e) {
     next(e);
   }
@@ -251,6 +256,82 @@ router.get(
           listId: list.id,
         });
         res.status(201).send({ ...addCollab.dataValues });
+      }
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+// get my favorite restaurants
+router.get("/favorites", authMiddleware, async (req, res, next) => {
+  const userWithFavorites = await User.findByPk(req.user.id, {
+    include: {
+      model: Restaurant,
+      through: {
+        attributes: ["restaurantId"],
+      },
+    },
+  });
+  if (!userWithFavorites) res.status(404).send({ message: "No user found" });
+  res.send(userWithFavorites);
+});
+
+// add restaurant to my favorites list (table: UserRest)
+router.post("/restaurant/:placeId/favorite", async (req, res, next) => {
+  try {
+    const { userId } = req.body;
+
+    // is restaurant already in the database?
+    const restaurant = await Restaurant.findOne({
+      where: { placeId: req.params.placeId },
+    });
+
+    if (!restaurant)
+      res.status(401).send({
+        message:
+          "You can only favorite a restaurant if it is on one of your lists.",
+      });
+    // find restaurant in favorites table
+    const checkRelation = await UserRest.findOne({
+      where: { userId: userId, restaurantId: restaurant.id },
+    });
+    if (checkRelation) {
+      res
+        .status(404)
+        .send({ message: "This restaurant is already marked as a favorite" });
+    } else {
+      const addFavorite = await UserRest.create({
+        userId: userId,
+        restaurantId: restaurant.id,
+      });
+      res.status(201).send({ ...addFavorite.dataValues });
+    }
+  } catch (e) {
+    next(e);
+  }
+});
+
+// DELETE restaurant from my favorites list (table: UserRest)
+router.delete(
+  "/restaurant/:restaurantId/remove",
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const restaurantId = req.params.restaurantId;
+      // is restaurant already in the database?
+      const restaurant = await UserRest.findOne({
+        where: { userId: req.user.id, restaurantId: restaurantId },
+      });
+      if (!restaurant) {
+        res.status(401).send({
+          message: "Restaurant is not on your favorites list.",
+        });
+      } else {
+        const removeFavorite = await restaurant.destroy();
+        res
+          .status(201)
+          .send({ message: "Restaurant no longer on favorites list" });
       }
     } catch (e) {
       next(e);
