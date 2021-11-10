@@ -39,7 +39,6 @@ router.post("/search", (req, res) => {
       if (error || response.statusCode !== 200) {
         return res.status(500).send({ type: "error", message: err.message });
       }
-
       res.send(JSON.parse(body));
     }
   );
