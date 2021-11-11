@@ -135,7 +135,7 @@ router.get("/mylists/:id", async (req, res, next) => {
   }
 });
 
-// Create a new lists - POST `localhost:4000/mylists`
+// Create a new list - POST `localhost:4000/mylists`
 router.post("/mylists", authMiddleware, async (req, res, next) => {
   try {
     const user = await User.findByPk(req.user.id);

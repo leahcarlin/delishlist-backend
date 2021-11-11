@@ -2,8 +2,10 @@ const { Router } = require("express");
 const request = require("request");
 const router = new Router();
 const authMiddleware = require("../auth/middleware");
+require("dotenv").config();
 
-const API_KEY = "AIzaSyC8xDuaNPzG31t7Ns31FOlA8Q1HngWaWTM";
+const API_KEY = process.env.GKEY;
+console.log(process.env);
 
 //model imports
 const ListRest = require("../models/").listRest;
@@ -31,6 +33,7 @@ router.get("/:id", (req, res) => {
 // search for a restaurant by name using google places api
 router.post("/search", (req, res) => {
   const { name } = req.body;
+  console.log(API_KEY);
   request(
     {
       url: `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${name}&inputtype=textquery&fields=formatted_address%2Cname%2Cprice_level%2Crating%2Cphotos%2Cplace_id&key=${API_KEY}`,
