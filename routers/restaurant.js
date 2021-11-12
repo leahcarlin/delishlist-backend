@@ -2,7 +2,7 @@ const { Router } = require("express");
 const request = require("request");
 const router = new Router();
 const authMiddleware = require("../auth/middleware");
-require("dotenv").config();
+// require("dotenv").config();
 
 const API_KEY = process.env.GKEY;
 console.log(process.env);
