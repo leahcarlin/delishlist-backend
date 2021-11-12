@@ -182,6 +182,16 @@ router.post("/mylists/:id", authMiddleware, async (req, res, next) => {
         rating,
       });
     }
+    // check if restaurant is already on this list
+    const checkExists = await ListRest.findOne({
+      where: {
+        listId: list.id,
+        restaurantId: restaurant.id,
+      },
+    });
+
+    if (checkExists)
+      res.status(401).send({ message: "Restaurant is already on this list" });
 
     const setRelationsListRest = await ListRest.create({
       listId: list.id,
@@ -338,5 +348,15 @@ router.delete(
     }
   }
 );
+
+// get all restaurants on all users lists
+router.get("/restaurant/browse", async (req, res, next) => {
+  try {
+    const allRestaurants = await Restaurant.findAll();
+    res.status(200).send(allRestaurants);
+  } catch (e) {
+    next(e);
+  }
+});
 
 module.exports = router;
