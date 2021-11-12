@@ -8,7 +8,7 @@ const authMiddleWare = require("./auth/middleware");
 const authRouter = require("./routers/auth");
 const restRouter = require("./routers/restaurant");
 const { application } = require("express");
-require("dotenv").config();
+// require("dotenv").config();
 // console.log(process.env);
 const app = express();
 /**
