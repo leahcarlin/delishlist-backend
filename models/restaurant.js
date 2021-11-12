@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
         through: "listRests",
         foreignKey: "restaurantId",
       });
+      restaurant.belongsToMany(models.user, {
+        through: "userRests",
+        foreignKey: "restaurantId",
+      });
     }
   }
   restaurant.init(

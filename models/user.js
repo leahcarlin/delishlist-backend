@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
       user.hasMany(models.list, {
         foreignKey: "ownerId",
       });
+      user.belongsToMany(models.restaurant, {
+        through: "userRests",
+        foreignKey: "userId",
+      });
     }
   }
   user.init(
