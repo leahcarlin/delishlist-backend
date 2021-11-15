@@ -3,9 +3,7 @@ const request = require("request");
 const router = new Router();
 const authMiddleware = require("../auth/middleware");
 require("dotenv").config();
-
-const API_KEY = process.env.GKEY;
-console.log(process.env);
+const { API_KEY } = require("./config/constants");
 
 //model imports
 const ListRest = require("../models/").listRest;
