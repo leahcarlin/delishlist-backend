@@ -84,7 +84,7 @@ router.get("/me", authMiddleware, async (req, res) => {
   res.status(200).send({ ...req.user.dataValues });
 });
 
-// GET my lists `localhost:4000/mylists`
+// GET my lists that I am an owner of `localhost:4000/mylists`
 router.get("/mylists", authMiddleware, async (req, res, next) => {
   try {
     const userWithLists = await User.findByPk(req.user.id, {
@@ -100,6 +100,27 @@ router.get("/mylists", authMiddleware, async (req, res, next) => {
     });
     // console.log("user in back end", userWithLists);
     res.send(userWithLists);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// GET ALL my lists that I am an owner & collaborator of `localhost:4000/mylists/all`
+router.get("/mylists/all", authMiddleware, async (req, res, next) => {
+  try {
+    const allLists = await Collaborator.findAll({
+      where: { userId: req.user.id },
+      include: {
+        model: List,
+        include: {
+          model: User,
+          through: {
+            attributes: [],
+          },
+        },
+      },
+    });
+    res.send(allLists);
   } catch (e) {
     next(e);
   }
@@ -425,6 +446,36 @@ router.delete(
         });
       const removeRestaurant = await checkListRest.destroy();
       res.status(201).send({ message: "Restaurant removed from list" });
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+//remove collaborator from a list
+router.delete(
+  "/mylists/:listId/collaborator/:id",
+  authMiddleware,
+  async (req, res, next) => {
+    const listId = req.params.listId;
+    const collabId = req.params.id;
+    try {
+      const checkOwner = await List.findOne({
+        where: { id: listId, ownerId: req.user.id },
+      });
+      if (!checkOwner)
+        res.status(401).send({
+          message: "Only owners of the list can edit it",
+        });
+      const findCollab = await Collaborator.findOne({
+        where: { listId: listId, userId: collabId },
+      });
+      if (!findCollab)
+        res.status(404).send({
+          message: "Collaborator was not found for this list",
+        });
+      const removeCollab = await findCollab.destroy();
+      res.status(201).send({ message: "Collaborator removed from list" });
     } catch (e) {
       next(e);
     }
