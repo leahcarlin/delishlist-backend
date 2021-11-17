@@ -334,7 +334,7 @@ router.delete(
         where: { userId: req.user.id, restaurantId: restaurantId },
       });
       if (!restaurant) {
-        res.status(401).send({
+        res.status(404).send({
           message: "Restaurant is not on your favorites list.",
         });
       } else {
@@ -359,4 +359,75 @@ router.get("/restaurant/browse", async (req, res, next) => {
   }
 });
 
+// edit the name of a list
+router.patch("/mylists/:listId", authMiddleware, async (req, res, next) => {
+  try {
+    const listId = req.params.listId;
+    const listToEdit = await List.findOne({
+      where: { id: listId, ownerId: req.user.id },
+    });
+    if (!listToEdit)
+      res.status(401).send({
+        message: "Only owners of the list can edit it",
+      });
+    else {
+      const { title } = req.body;
+      const updateListName = await listToEdit.update({ title });
+      res.send(updateListName);
+    }
+  } catch (e) {
+    next(e);
+  }
+});
+
+// delete  a list
+router.delete("/mylists/:listId", authMiddleware, async (req, res, next) => {
+  try {
+    const listId = req.params.listId;
+    const listToDelete = await List.findOne({
+      where: { id: listId, ownerId: req.user.id },
+    });
+    if (!listToDelete)
+      res.status(401).send({
+        message: "Only owners of the list can delete it",
+      });
+    else {
+      const deleteList = await listToDelete.destroy();
+      res.status(201).send({ message: "List deleted" });
+    }
+  } catch (e) {
+    next(e);
+  }
+});
+
+// remove restaurant from a specific list
+router.delete(
+  "/mylists/:listId/restaurant/:restaurantId",
+  authMiddleware,
+  async (req, res, next) => {
+    const listId = req.params.listId;
+    const restaurantId = req.params.restaurantId;
+    try {
+      const checkOwner = await List.findOne({
+        where: { id: listId, ownerId: req.user.id },
+      });
+      if (!checkOwner)
+        res.status(401).send({
+          message: "Only owners of the list can edit it",
+        });
+      const checkListRest = await ListRest.findOne({
+        where: { listId: listId, restaurantId: restaurantId },
+      });
+
+      if (!checkListRest)
+        res.status(404).send({
+          message: "Restaurant was not found on this list",
+        });
+      const removeRestaurant = await checkListRest.destroy();
+      res.status(201).send({ message: "Restaurant removed from list" });
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 module.exports = router;
