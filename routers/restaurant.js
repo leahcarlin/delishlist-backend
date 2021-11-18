@@ -4,13 +4,13 @@ const router = new Router();
 const authMiddleware = require("../auth/middleware");
 require("dotenv").config();
 const { API_KEY } = require("../config/constants");
-
 //model imports
 const ListRest = require("../models/").listRest;
 const Restaurant = require("../models/").restaurant;
 const UserRest = require("../models/").userRest;
 const User = require("../models/").user;
 
+// console.log("constants?", constants);
 // GET a restaurant with its placeId
 router.get("/:id", (req, res) => {
   const placeId = req.params.id;
@@ -31,7 +31,7 @@ router.get("/:id", (req, res) => {
 // search for a restaurant by name using google places api
 router.post("/search", (req, res) => {
   const { name } = req.body;
-  console.log(API_KEY);
+
   request(
     {
       url: `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${name}&inputtype=textquery&fields=formatted_address%2Cname%2Cprice_level%2Crating%2Cphotos%2Cplace_id&key=${API_KEY}`,
